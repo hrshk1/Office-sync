@@ -10,24 +10,37 @@ const CreateTask = () => {
     const [taskDescription, settaskDescription] = useState('')
     const [assignTo, setassignTo] = useState('')
     const [category, setcategory] = useState('')
-    const [task, settask] = useState({})
-    //since we have wroitten {} inside task that means we want to make object, if suppose we would have written [] then that meant that we wanted task to be an array
+    // Keep task shape aligned with task cards (title/date/description).
     
     const submitHandler =(e)=>{
         e.preventDefault();
-        const newTask = {taskTitle, taskDate, taskDescription, assignTo, category, active:false, completed:false, newTask:true, failed:false};
-        settask(newTask);
-        const data = userData
-        // console.log(newTask); 
-        
-        data.forEach(function(e){
-            if(assignTo==e.firstname){
-                e.tasks.push(task)
-                // console.log(e)
-                e.taskNumbers.newTask=e.taskNumbers.newTask+1;
+        const newTask = {
+            title: taskTitle,
+            date: taskDate,
+            description: taskDescription,
+            category,
+            active: false,
+            completed: false,
+            newTask: true,
+            failed: false
+        };
+
+        const updatedUsers = userData.map((employee) => {
+            if (assignTo === employee.firstname) {
+                return {
+                    ...employee,
+                    tasks: [...employee.tasks, newTask],
+                    taskNumbers: {
+                        ...employee.taskNumbers,
+                        newTask: employee.taskNumbers.newTask + 1
+                    }
+                }
             }
+            return employee
         })
-        setUserData(data)
+
+        setUserData(updatedUsers)
+        localStorage.setItem('employees', JSON.stringify(updatedUsers))
 
         setassignTo('')
         setcategory('')

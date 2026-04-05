@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import Login from '../Auth/Login'
 
 const Header = (props) => {
   const [username, setusername] = useState('')
@@ -12,9 +11,8 @@ const Header = (props) => {
     }
   }, [props.data]);
   const logOutUser=()=>{
-    localStorage.setItem('loggedInUser','')
-    props.changeUser('')
-    console.log(props.changeUser)
+    localStorage.removeItem('loggedInUser')
+    props.changeUser(null)
     // window.location.reload();
     //why are we reloading the windows?
     //because this function will simply set the value of loggedInUser as empty string but now the browser should come to know that the value of loggedinuser has changed for which we should reload the window

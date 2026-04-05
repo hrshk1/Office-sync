@@ -2,24 +2,37 @@ import React, { useContext, useEffect, useState } from 'react'
 import Login from './components/Auth/Login'
 import EmployeeDashboard from './components/Dashboard/EmployeeDashboard'
 import AdminDashboard from './components/Dashboard/AdminDashboard'
-import { setLocalStorage } from './utils/localStorage'
-import { getLocalStorage } from './utils/localStorage'
 import { AuthContext } from './context/AuthProvider'
 const App = () => {
-  const [userData, setUserData] = useContext(AuthContext)
+  const [userData] = useContext(AuthContext)
   const [user, setUser] = useState(null)
   const [LoggedInUserData, setLoggedInUserData] = useState(null)
+  const [loggedInUserEmail, setLoggedInUserEmail] = useState(null)
   useEffect(()=>{
     const loggedInUser = localStorage.getItem('loggedInUser')
     console.log(loggedInUser)
 
     if(loggedInUser){
-      const userData=JSON.parse(loggedInUser)
-      setUser(userData.role)
-      setLoggedInUserData(userData.data)
-      // console.log(userData)
+      const parsedUser = JSON.parse(loggedInUser)
+      setUser(parsedUser.role)
+      if (parsedUser.role === 'employee') {
+        const email = parsedUser.email || parsedUser.data?.email
+        setLoggedInUserEmail(email)
+        if (parsedUser.data) {
+          setLoggedInUserData(parsedUser.data)
+        }
+      }
     }
   },[])
+
+  useEffect(() => {
+    if (user === 'employee' && userData && loggedInUserEmail) {
+      const currentEmployee = userData.find((employee) => employee.email === loggedInUserEmail)
+      if (currentEmployee) {
+        setLoggedInUserData(currentEmployee)
+      }
+    }
+  }, [userData, loggedInUserEmail, user])
   // useEffect(() => {
   //   setLocalStorage()
   // },)
@@ -47,8 +60,9 @@ const App = () => {
       console.log(employee)
       if (employee){
         setUser('employee')
+        setLoggedInUserEmail(employee.email)
         setLoggedInUserData(employee)
-        localStorage.setItem('loggedInUser',JSON.stringify({role:'employee', data:employee}))
+        localStorage.setItem('loggedInUser',JSON.stringify({role:'employee', email:employee.email}))
       }
       
     }
@@ -65,7 +79,7 @@ const App = () => {
   return (
     <>
       {!user ? <Login handleLogin={handleLogin} /> : null}
-      {user === "admin" ? <AdminDashboard changeUser={setUser}/> : user === "employee" ? <EmployeeDashboard changeUser={setUser} data={LoggedInUserData}/> : null}
+      {user === "admin" ? <AdminDashboard changeUser={setUser}/> : user === "employee" && LoggedInUserData ? <EmployeeDashboard changeUser={setUser} data={LoggedInUserData}/> : null}
     </>
   );}
   
